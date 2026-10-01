@@ -30,4 +30,9 @@ public class DeveloperController {
     public Developer getDeveloperById(@PathVariable Long id) {
         return developerService.getDeveloperById(id);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteDeveloper(@PathVariable Long id) {
+        developerService.deleteDeveloper(id);
+    }
 }

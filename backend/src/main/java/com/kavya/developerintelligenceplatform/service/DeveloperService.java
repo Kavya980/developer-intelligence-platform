@@ -26,4 +26,7 @@ public class DeveloperService {
     public Developer getDeveloperById(Long id) {
         return developerRepository.findById(id).orElse(null);
     }
+    public void deleteDeveloper(Long id) {
+        developerRepository.deleteById(id);
+    }
 }
