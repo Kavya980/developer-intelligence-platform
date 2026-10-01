@@ -1,0 +1,7 @@
+POST http://localhost:8080/api/developers
+Content-Type: application/json
+
+{
+  "username": "Kavya980",
+  "name": "Kavya"
+}
