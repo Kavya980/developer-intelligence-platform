@@ -1,6 +1,8 @@
 package com.kavya.developerintelligenceplatform.controller;
 
 import java.util.List;
+import com.kavya.developerintelligenceplatform.dto.DeveloperDTO;
+import jakarta.validation.Valid;
 
 import com.kavya.developerintelligenceplatform.entity.Developer;
 import com.kavya.developerintelligenceplatform.service.DeveloperService;
@@ -17,7 +19,13 @@ public class DeveloperController {
     }
 
     @PostMapping
-    public Developer createDeveloper(@RequestBody Developer developer) {
+    public Developer createDeveloper(@Valid @RequestBody DeveloperDTO developerDTO) {
+
+        Developer developer = new Developer();
+
+        developer.setUsername(developerDTO.getUsername());
+        developer.setName(developerDTO.getName());
+
         return developerService.saveDeveloper(developer);
     }
 

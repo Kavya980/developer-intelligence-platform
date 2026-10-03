@@ -1,8 +1,14 @@
 package com.kavya.developerintelligenceplatform.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
+
 public class DeveloperDTO {
 
+    @NotBlank(message = "Username cannot be empty")
     private String username;
+
+    @NotBlank(message = "Name cannot be empty")
     private String name;
 
     public DeveloperDTO() {
