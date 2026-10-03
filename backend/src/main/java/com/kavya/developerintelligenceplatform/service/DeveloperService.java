@@ -29,4 +29,17 @@ public class DeveloperService {
     public void deleteDeveloper(Long id) {
         developerRepository.deleteById(id);
     }
+    public Developer updateDeveloper(Long id, Developer updatedDeveloper) {
+
+        Developer existingDeveloper = developerRepository.findById(id).orElse(null);
+
+        if (existingDeveloper == null) {
+            return null;
+        }
+
+        existingDeveloper.setUsername(updatedDeveloper.getUsername());
+        existingDeveloper.setName(updatedDeveloper.getName());
+
+        return developerRepository.save(existingDeveloper);
+    }
 }

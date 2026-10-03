@@ -35,4 +35,12 @@ public class DeveloperController {
     public void deleteDeveloper(@PathVariable Long id) {
         developerService.deleteDeveloper(id);
     }
+
+    @PutMapping("/{id}")
+    public Developer updateDeveloper(
+            @PathVariable Long id,
+            @RequestBody Developer developer) {
+
+        return developerService.updateDeveloper(id, developer);
+    }
 }
