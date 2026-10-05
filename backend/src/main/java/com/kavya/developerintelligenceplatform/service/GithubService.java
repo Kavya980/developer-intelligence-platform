@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kavya.developerintelligenceplatform.dto.GithubCommitActivityDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubCommitDTO;
+import com.kavya.developerintelligenceplatform.dto.GithubLanguageDTO;
+import com.kavya.developerintelligenceplatform.dto.GithubLanguageSummaryDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubRepositoryDTO;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +14,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GithubService {
@@ -142,6 +146,62 @@ public class GithubService {
                 message,
                 authorName,
                 date
+        );
+    }
+
+    public GithubLanguageSummaryDTO getLanguages(
+            String username,
+            String repository)
+            throws IOException, InterruptedException {
+
+        String url =
+                "https://api.github.com/repos/"
+                        + username
+                        + "/"
+                        + repository
+                        + "/languages";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Accept", "application/vnd.github+json")
+                .header("X-GitHub-Api-Version", "2022-11-28")
+                .GET()
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString()
+                );
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException(
+                    "GitHub API error: " + response.statusCode());
+        }
+
+        Map<String, Long> languageMap =
+                objectMapper.readValue(
+                        response.body(),
+                        new TypeReference<Map<String, Long>>() {}
+                );
+
+        List<GithubLanguageDTO> languages =
+                new ArrayList<>();
+
+        for (Map.Entry<String, Long> entry :
+                languageMap.entrySet()) {
+
+            languages.add(
+                    new GithubLanguageDTO(
+                            entry.getKey(),
+                            entry.getValue()
+                    )
+            );
+        }
+
+        return new GithubLanguageSummaryDTO(
+                repository,
+                languages
         );
     }
 }
