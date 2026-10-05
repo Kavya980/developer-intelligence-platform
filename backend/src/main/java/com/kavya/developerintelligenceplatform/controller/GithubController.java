@@ -1,5 +1,6 @@
 package com.kavya.developerintelligenceplatform.controller;
 
+import com.kavya.developerintelligenceplatform.dto.GithubCommitDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubRepositoryDTO;
 import com.kavya.developerintelligenceplatform.service.GithubService;
 import org.springframework.web.bind.annotation.*;
@@ -23,5 +24,14 @@ public class GithubController {
             throws IOException, InterruptedException {
 
         return githubService.getRepositories(username);
+    }
+
+    @GetMapping("/repositories/{username}/{repository}/commits")
+    public List<GithubCommitDTO> getCommits(
+            @PathVariable String username,
+            @PathVariable String repository)
+            throws IOException, InterruptedException {
+
+        return githubService.getCommits(username, repository);
     }
 }

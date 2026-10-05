@@ -2,6 +2,7 @@ package com.kavya.developerintelligenceplatform.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kavya.developerintelligenceplatform.dto.GithubCommitDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubRepositoryDTO;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,8 @@ public class GithubService {
     }
 
     public List<GithubRepositoryDTO> getRepositories(
-            String githubUsername) throws IOException, InterruptedException {
+            String githubUsername)
+            throws IOException, InterruptedException {
 
         String url =
                 "https://api.github.com/users/"
@@ -52,6 +54,42 @@ public class GithubService {
         return objectMapper.readValue(
                 response.body(),
                 new TypeReference<List<GithubRepositoryDTO>>() {}
+        );
+    }
+
+    public List<GithubCommitDTO> getCommits(
+            String username,
+            String repository)
+            throws IOException, InterruptedException {
+
+        String url =
+                "https://api.github.com/repos/"
+                        + username
+                        + "/"
+                        + repository
+                        + "/commits?per_page=10";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Accept", "application/vnd.github+json")
+                .header("X-GitHub-Api-Version", "2022-11-28")
+                .GET()
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString()
+                );
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException(
+                    "GitHub API error: " + response.statusCode());
+        }
+
+        return objectMapper.readValue(
+                response.body(),
+                new TypeReference<List<GithubCommitDTO>>() {}
         );
     }
 }

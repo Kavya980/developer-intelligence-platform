@@ -1,17 +1,28 @@
 package com.kavya.developerintelligenceplatform.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GithubRepositoryDTO {
 
     private Long id;
     private String name;
+
+    @JsonProperty("full_name")
     private String fullName;
+
     private String description;
+
+    @JsonProperty("html_url")
     private String htmlUrl;
+
+    @JsonProperty("stargazers_count")
     private int stars;
+
+    @JsonProperty("forks_count")
     private int forks;
+
     private String language;
 
     public GithubRepositoryDTO() {
