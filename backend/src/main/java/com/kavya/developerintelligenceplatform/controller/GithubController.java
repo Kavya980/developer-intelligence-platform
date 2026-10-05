@@ -7,6 +7,8 @@ import com.kavya.developerintelligenceplatform.dto.GithubIssueDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubLanguageSummaryDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubPullRequestDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubRepositoryDTO;
+import com.kavya.developerintelligenceplatform.entity.GithubRepository;
+import com.kavya.developerintelligenceplatform.service.GithubRepositoryService;
 import com.kavya.developerintelligenceplatform.service.GithubService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,9 +20,14 @@ import java.util.List;
 public class GithubController {
 
     private final GithubService githubService;
+    private final GithubRepositoryService githubRepositoryService;
 
-    public GithubController(GithubService githubService) {
+    public GithubController(
+            GithubService githubService,
+            GithubRepositoryService githubRepositoryService) {
+
         this.githubService = githubService;
+        this.githubRepositoryService = githubRepositoryService;
     }
 
     @GetMapping("/repositories/{username}")
@@ -97,5 +104,22 @@ public class GithubController {
             throws IOException, InterruptedException {
 
         return githubService.getUserEvents(username);
+    }
+
+    @PostMapping("/sync/{developerId}")
+    public List<GithubRepository> syncRepositories(
+            @PathVariable Long developerId)
+            throws Exception {
+
+        return githubRepositoryService
+                .syncRepositories(developerId);
+    }
+
+    @GetMapping("/saved/{developerId}")
+    public List<GithubRepository> getSavedRepositories(
+            @PathVariable Long developerId) {
+
+        return githubRepositoryService
+                .getRepositories(developerId);
     }
 }

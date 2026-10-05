@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -26,7 +25,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(UserRepository userRepository) {
+    public UserDetailsService userDetailsService(
+            UserRepository userRepository) {
 
         return username -> userRepository.findByUsername(username)
                 .map(user -> User.withUsername(user.getUsername())
@@ -40,7 +40,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+            JwtAuthenticationFilter jwtAuthenticationFilter)
+            throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
@@ -56,13 +57,11 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // Public APIs
                         .requestMatchers(
                                 "/api/auth/register",
                                 "/api/auth/login"
                         ).permitAll()
 
-                        // Role-based APIs
                         .requestMatchers("/api/admin/**")
                         .hasRole("ADMIN")
 
@@ -72,8 +71,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/developer/**")
                         .hasRole("DEVELOPER")
 
-                        // Everything else needs login
-                        .anyRequest().authenticated()
+                        // GitHub APIs require developer login
+                        .requestMatchers("/api/github/**")
+                        .hasRole("DEVELOPER")
+
+                        .anyRequest()
+                        .authenticated()
                 )
 
                 .addFilterBefore(
