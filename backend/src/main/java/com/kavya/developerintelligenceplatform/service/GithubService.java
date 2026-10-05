@@ -2,6 +2,7 @@ package com.kavya.developerintelligenceplatform.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kavya.developerintelligenceplatform.dto.GithubCommitActivityDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubCommitDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubRepositoryDTO;
 import org.springframework.stereotype.Service;
@@ -90,6 +91,57 @@ public class GithubService {
         return objectMapper.readValue(
                 response.body(),
                 new TypeReference<List<GithubCommitDTO>>() {}
+        );
+    }
+
+    public GithubCommitActivityDTO getCommitActivity(
+            String username,
+            String repository)
+            throws IOException, InterruptedException {
+
+        List<GithubCommitDTO> commits =
+                getCommits(username, repository);
+
+        if (commits.isEmpty()) {
+            return new GithubCommitActivityDTO(
+                    repository,
+                    0,
+                    null,
+                    null,
+                    null
+            );
+        }
+
+        GithubCommitDTO latestCommit = commits.get(0);
+
+        String message =
+                latestCommit.getCommit() != null
+                        ? latestCommit.getCommit().getMessage()
+                        : null;
+
+        String authorName = null;
+        String date = null;
+
+        if (latestCommit.getCommit() != null
+                && latestCommit.getCommit().getAuthor() != null) {
+
+            authorName =
+                    latestCommit.getCommit()
+                            .getAuthor()
+                            .getName();
+
+            date =
+                    latestCommit.getCommit()
+                            .getAuthor()
+                            .getDate();
+        }
+
+        return new GithubCommitActivityDTO(
+                repository,
+                commits.size(),
+                message,
+                authorName,
+                date
         );
     }
 }

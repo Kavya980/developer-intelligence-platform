@@ -1,5 +1,6 @@
 package com.kavya.developerintelligenceplatform.controller;
 
+import com.kavya.developerintelligenceplatform.dto.GithubCommitActivityDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubCommitDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubRepositoryDTO;
 import com.kavya.developerintelligenceplatform.service.GithubService;
@@ -33,5 +34,17 @@ public class GithubController {
             throws IOException, InterruptedException {
 
         return githubService.getCommits(username, repository);
+    }
+
+    @GetMapping("/repositories/{username}/{repository}/activity")
+    public GithubCommitActivityDTO getCommitActivity(
+            @PathVariable String username,
+            @PathVariable String repository)
+            throws IOException, InterruptedException {
+
+        return githubService.getCommitActivity(
+                username,
+                repository
+        );
     }
 }
