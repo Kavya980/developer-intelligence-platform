@@ -25,6 +25,12 @@ public class GithubRepositoryDTO {
 
     private String language;
 
+    @JsonProperty("open_issues_count")
+    private int openIssues;
+
+    @JsonProperty("updated_at")
+    private String updatedAt;
+
     public GithubRepositoryDTO() {
     }
 
@@ -60,6 +66,14 @@ public class GithubRepositoryDTO {
         return language;
     }
 
+    public int getOpenIssues() {
+        return openIssues;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -90,5 +104,13 @@ public class GithubRepositoryDTO {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public void setOpenIssues(int openIssues) {
+        this.openIssues = openIssues;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
