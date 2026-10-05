@@ -7,7 +7,9 @@ import com.kavya.developerintelligenceplatform.dto.GithubIssueDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubLanguageSummaryDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubPullRequestDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubRepositoryDTO;
+import com.kavya.developerintelligenceplatform.entity.GithubCommit;
 import com.kavya.developerintelligenceplatform.entity.GithubRepository;
+import com.kavya.developerintelligenceplatform.service.GithubCommitService;
 import com.kavya.developerintelligenceplatform.service.GithubRepositoryService;
 import com.kavya.developerintelligenceplatform.service.GithubService;
 import org.springframework.web.bind.annotation.*;
@@ -21,13 +23,16 @@ public class GithubController {
 
     private final GithubService githubService;
     private final GithubRepositoryService githubRepositoryService;
+    private final GithubCommitService githubCommitService;
 
     public GithubController(
             GithubService githubService,
-            GithubRepositoryService githubRepositoryService) {
+            GithubRepositoryService githubRepositoryService,
+            GithubCommitService githubCommitService) {
 
         this.githubService = githubService;
         this.githubRepositoryService = githubRepositoryService;
+        this.githubCommitService = githubCommitService;
     }
 
     @GetMapping("/repositories/{username}")
@@ -121,5 +126,22 @@ public class GithubController {
 
         return githubRepositoryService
                 .getRepositories(developerId);
+    }
+
+    @PostMapping("/commits/sync/{developerId}")
+    public List<GithubCommit> syncCommits(
+            @PathVariable Long developerId)
+            throws Exception {
+
+        return githubCommitService
+                .syncCommits(developerId);
+    }
+
+    @GetMapping("/commits/saved/{developerId}")
+    public List<GithubCommit> getSavedCommits(
+            @PathVariable Long developerId) {
+
+        return githubCommitService
+                .getCommits(developerId);
     }
 }
