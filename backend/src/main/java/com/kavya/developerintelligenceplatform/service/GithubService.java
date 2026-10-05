@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kavya.developerintelligenceplatform.dto.GithubCommitActivityDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubCommitDTO;
+import com.kavya.developerintelligenceplatform.dto.GithubEventDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubIssueDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubLanguageDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubLanguageSummaryDTO;
@@ -276,6 +277,39 @@ public class GithubService {
         return objectMapper.readValue(
                 response.body(),
                 new TypeReference<List<GithubPullRequestDTO>>() {}
+        );
+    }
+
+    public List<GithubEventDTO> getUserEvents(
+            String username)
+            throws IOException, InterruptedException {
+
+        String url =
+                "https://api.github.com/users/"
+                        + username
+                        + "/events/public?per_page=30";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Accept", "application/vnd.github+json")
+                .header("X-GitHub-Api-Version", "2022-11-28")
+                .GET()
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString()
+                );
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException(
+                    "GitHub API error: " + response.statusCode());
+        }
+
+        return objectMapper.readValue(
+                response.body(),
+                new TypeReference<List<GithubEventDTO>>() {}
         );
     }
 }

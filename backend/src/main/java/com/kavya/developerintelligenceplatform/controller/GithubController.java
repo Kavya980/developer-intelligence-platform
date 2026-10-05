@@ -2,6 +2,7 @@ package com.kavya.developerintelligenceplatform.controller;
 
 import com.kavya.developerintelligenceplatform.dto.GithubCommitActivityDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubCommitDTO;
+import com.kavya.developerintelligenceplatform.dto.GithubEventDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubIssueDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubLanguageSummaryDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubPullRequestDTO;
@@ -88,5 +89,13 @@ public class GithubController {
                 username,
                 repository
         );
+    }
+
+    @GetMapping("/users/{username}/events")
+    public List<GithubEventDTO> getUserEvents(
+            @PathVariable String username)
+            throws IOException, InterruptedException {
+
+        return githubService.getUserEvents(username);
     }
 }
