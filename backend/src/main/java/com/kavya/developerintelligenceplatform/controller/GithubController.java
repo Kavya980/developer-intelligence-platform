@@ -2,7 +2,9 @@ package com.kavya.developerintelligenceplatform.controller;
 
 import com.kavya.developerintelligenceplatform.dto.GithubCommitActivityDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubCommitDTO;
+import com.kavya.developerintelligenceplatform.dto.GithubIssueDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubLanguageSummaryDTO;
+import com.kavya.developerintelligenceplatform.dto.GithubPullRequestDTO;
 import com.kavya.developerintelligenceplatform.dto.GithubRepositoryDTO;
 import com.kavya.developerintelligenceplatform.service.GithubService;
 import org.springframework.web.bind.annotation.*;
@@ -59,6 +61,30 @@ public class GithubController {
             throws IOException, InterruptedException {
 
         return githubService.getLanguages(
+                username,
+                repository
+        );
+    }
+
+    @GetMapping("/repositories/{username}/{repository}/issues")
+    public List<GithubIssueDTO> getIssues(
+            @PathVariable String username,
+            @PathVariable String repository)
+            throws IOException, InterruptedException {
+
+        return githubService.getIssues(
+                username,
+                repository
+        );
+    }
+
+    @GetMapping("/repositories/{username}/{repository}/pulls")
+    public List<GithubPullRequestDTO> getPullRequests(
+            @PathVariable String username,
+            @PathVariable String repository)
+            throws IOException, InterruptedException {
+
+        return githubService.getPullRequests(
                 username,
                 repository
         );
