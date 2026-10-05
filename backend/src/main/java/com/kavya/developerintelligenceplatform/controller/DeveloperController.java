@@ -1,13 +1,13 @@
 package com.kavya.developerintelligenceplatform.controller;
 
-import java.util.List;
 import com.kavya.developerintelligenceplatform.dto.DeveloperDTO;
-import jakarta.validation.Valid;
-
-
 import com.kavya.developerintelligenceplatform.entity.Developer;
 import com.kavya.developerintelligenceplatform.service.DeveloperService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/developers")
@@ -20,14 +20,18 @@ public class DeveloperController {
     }
 
     @PostMapping
-    public Developer createDeveloper(@Valid @RequestBody DeveloperDTO developerDTO) {
+    public Developer createDeveloper(
+            @Valid @RequestBody DeveloperDTO developerDTO) {
 
         Developer developer = new Developer();
 
-        developer.setUsername(developerDTO.getUsername());
         developer.setName(developerDTO.getName());
+        developer.setEmail(developerDTO.getEmail());
+        developer.setGithubUsername(developerDTO.getGithubUsername());
+        developer.setLeetcodeUsername(developerDTO.getLeetcodeUsername());
+        developer.setCodeforcesUsername(developerDTO.getCodeforcesUsername());
 
-        return developerService.saveDeveloper(developer);
+        return developerService.createDeveloper(developer);
     }
 
     @GetMapping
@@ -36,20 +40,58 @@ public class DeveloperController {
     }
 
     @GetMapping("/{id}")
-    public Developer getDeveloperById(@PathVariable Long id) {
-        return developerService.getDeveloperById(id);
-    }
+    public ResponseEntity<Developer> getDeveloperById(
+            @PathVariable Long id) {
 
-    @DeleteMapping("/{id}")
-    public void deleteDeveloper(@PathVariable Long id) {
-        developerService.deleteDeveloper(id);
+        Developer developer =
+                developerService.getDeveloperById(id);
+
+        if (developer == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(developer);
     }
 
     @PutMapping("/{id}")
-    public Developer updateDeveloper(
+    public ResponseEntity<Developer> updateDeveloper(
             @PathVariable Long id,
-            @RequestBody Developer developer) {
+            @Valid @RequestBody DeveloperDTO developerDTO) {
 
-        return developerService.updateDeveloper(id, developer);
+        Developer updatedDeveloper = new Developer();
+
+        updatedDeveloper.setName(developerDTO.getName());
+        updatedDeveloper.setEmail(developerDTO.getEmail());
+        updatedDeveloper.setGithubUsername(
+                developerDTO.getGithubUsername());
+        updatedDeveloper.setLeetcodeUsername(
+                developerDTO.getLeetcodeUsername());
+        updatedDeveloper.setCodeforcesUsername(
+                developerDTO.getCodeforcesUsername());
+
+        Developer result =
+                developerService.updateDeveloper(id, updatedDeveloper);
+
+        if (result == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDeveloper(
+            @PathVariable Long id) {
+
+        Developer developer =
+                developerService.getDeveloperById(id);
+
+        if (developer == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        developerService.deleteDeveloper(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
