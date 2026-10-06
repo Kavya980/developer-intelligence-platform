@@ -1,0 +1,34 @@
+package com.kavya.developerintelligenceplatform.controller;
+
+import com.kavya.developerintelligenceplatform.dto.LeetcodeProfileDTO;
+import com.kavya.developerintelligenceplatform.dto.LeetcodeStatsDTO;
+import com.kavya.developerintelligenceplatform.service.LeetcodeService;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/leetcode")
+public class LeetcodeController {
+
+    private final LeetcodeService leetcodeService;
+
+    public LeetcodeController(
+            LeetcodeService leetcodeService) {
+
+        this.leetcodeService = leetcodeService;
+    }
+
+    @GetMapping("/{username}")
+    public LeetcodeProfileDTO getProfile(
+            @PathVariable String username) {
+
+        return leetcodeService.getProfile(username);
+    }
+
+    @GetMapping("/{username}/stats")
+    public LeetcodeStatsDTO getStats(
+            @PathVariable String username)
+            throws Exception {
+
+        return leetcodeService.getStats(username);
+    }
+}
