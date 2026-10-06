@@ -1,9 +1,12 @@
 package com.kavya.developerintelligenceplatform.controller;
 
+import com.kavya.developerintelligenceplatform.dto.LeetcodeProblemDTO;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeProfileDTO;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeStatsDTO;
 import com.kavya.developerintelligenceplatform.service.LeetcodeService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/leetcode")
@@ -30,5 +33,12 @@ public class LeetcodeController {
             throws Exception {
 
         return leetcodeService.getStats(username);
+    }
+
+    @GetMapping("/problems")
+    public List<LeetcodeProblemDTO> getProblems()
+            throws Exception {
+
+        return leetcodeService.getProblems();
     }
 }

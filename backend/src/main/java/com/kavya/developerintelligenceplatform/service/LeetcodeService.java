@@ -2,6 +2,7 @@ package com.kavya.developerintelligenceplatform.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kavya.developerintelligenceplatform.dto.LeetcodeProblemDTO;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeProfileDTO;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeStatsDTO;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class LeetcodeService {
@@ -29,12 +33,9 @@ public class LeetcodeService {
                     "LeetCode username cannot be empty");
         }
 
-        String profileUrl =
-                "https://leetcode.com/u/" + username + "/";
-
         return new LeetcodeProfileDTO(
                 username,
-                profileUrl
+                "https://leetcode.com/u/" + username + "/"
         );
     }
 
@@ -45,7 +46,7 @@ public class LeetcodeService {
                 query getUserProfile($username: String!) {
                     matchedUser(username: $username) {
                         username
-                        submitStats {
+                        submitStats: submitStatsGlobal {
                             acSubmissionNum {
                                 difficulty
                                 count
@@ -55,57 +56,15 @@ public class LeetcodeService {
                 }
                 """;
 
-        String variables =
-                "{\"username\":\"" + username + "\"}";
-
-        String requestBody =
-                objectMapper.writeValueAsString(
-                        new GraphQLRequest(
-                                query,
-                                java.util.Map.of(
-                                        "username",
-                                        username
-                                )
-                        )
-                );
-
-        HttpRequest request =
-                HttpRequest.newBuilder()
-                        .uri(URI.create(
-                                "https://leetcode.com/graphql"))
-                        .header(
-                                "Content-Type",
-                                "application/json")
-                        .header(
-                                "User-Agent",
-                                "Mozilla/5.0")
-                        .POST(
-                                HttpRequest.BodyPublishers
-                                        .ofString(requestBody))
-                        .build();
-
-        HttpResponse<String> response =
-                httpClient.send(
-                        request,
-                        HttpResponse.BodyHandlers.ofString()
-                );
-
-        if (response.statusCode() != 200) {
-            throw new RuntimeException(
-                    "LeetCode API error: "
-                            + response.statusCode());
-        }
-
-        JsonNode root =
-                objectMapper.readTree(response.body());
-
         JsonNode user =
-                root.path("data")
+                executeQuery(
+                        query,
+                        Map.of("username", username),
+                        "getUserProfile")
+                        .path("data")
                         .path("matchedUser");
 
-        if (user.isMissingNode()
-                || user.isNull()) {
-
+        if (user.isMissingNode() || user.isNull()) {
             throw new RuntimeException(
                     "LeetCode user not found");
         }
@@ -115,28 +74,23 @@ public class LeetcodeService {
         int medium = 0;
         int hard = 0;
 
-        JsonNode submissions =
+        for (JsonNode submission :
                 user.path("submitStats")
-                        .path("acSubmissionNum");
-
-        for (JsonNode submission : submissions) {
-
-            String difficulty =
-                    submission.path("difficulty")
-                            .asText();
+                        .path("acSubmissionNum")) {
 
             int count =
-                    submission.path("count")
+                    submission
+                            .path("count")
                             .asInt();
 
-            switch (difficulty) {
+            switch (
+                    submission
+                            .path("difficulty")
+                            .asText()) {
 
                 case "All" -> total = count;
-
                 case "Easy" -> easy = count;
-
                 case "Medium" -> medium = count;
-
                 case "Hard" -> hard = count;
             }
         }
@@ -150,8 +104,149 @@ public class LeetcodeService {
         );
     }
 
-    private record GraphQLRequest(
+    public List<LeetcodeProblemDTO> getProblems()
+            throws Exception {
+
+        String query = """
+                query problemsetQuestionList(
+                    $categorySlug: String,
+                    $limit: Int,
+                    $skip: Int,
+                    $filters: QuestionListFilterInput
+                ) {
+                    problemsetQuestionList: questionList(
+                        categorySlug: $categorySlug,
+                        limit: $limit,
+                        skip: $skip,
+                        filters: $filters
+                    ) {
+                        total: totalNum
+                        questions: data {
+                            difficulty
+                            questionFrontendId
+                            title
+                            titleSlug
+                            topicTags {
+                                name
+                                id
+                                slug
+                            }
+                        }
+                    }
+                }
+                """;
+
+        Map<String, Object> variables =
+                Map.of(
+                        "categorySlug", "",
+                        "limit", 20,
+                        "skip", 0,
+                        "filters", Map.of()
+                );
+
+        JsonNode questions =
+                executeQuery(
+                        query,
+                        variables,
+                        "problemsetQuestionList")
+                        .path("data")
+                        .path("problemsetQuestionList")
+                        .path("questions");
+
+        if (!questions.isArray()) {
+            throw new RuntimeException(
+                    "Invalid LeetCode problem response");
+        }
+
+        List<LeetcodeProblemDTO> problems =
+                new ArrayList<>();
+
+        for (JsonNode question : questions) {
+
+            List<String> topics =
+                    new ArrayList<>();
+
+            for (JsonNode topic :
+                    question.path("topicTags")) {
+
+                topics.add(
+                        topic
+                                .path("name")
+                                .asText()
+                );
+            }
+
+            problems.add(
+                    new LeetcodeProblemDTO(
+                            question
+                                    .path("questionFrontendId")
+                                    .asInt(),
+
+                            question
+                                    .path("title")
+                                    .asText(),
+
+                            question
+                                    .path("difficulty")
+                                    .asText(),
+
+                            topics
+                    )
+            );
+        }
+
+        return problems;
+    }
+
+    private JsonNode executeQuery(
             String query,
-            java.util.Map<String, String> variables) {
+            Map<String, ?> variables,
+            String operationName)
+            throws Exception {
+
+        String requestBody =
+                objectMapper.writeValueAsString(
+                        Map.of(
+                                "query", query,
+                                "variables", variables,
+                                "operationName", operationName
+                        )
+                );
+
+        HttpRequest request =
+                HttpRequest.newBuilder()
+                        .uri(URI.create(
+                                "https://leetcode.com/graphql/"))
+                        .header(
+                                "Content-Type",
+                                "application/json")
+                        .header(
+                                "User-Agent",
+                                "Mozilla/5.0")
+                        .header(
+                                "Accept",
+                                "application/json")
+                        .POST(
+                                HttpRequest.BodyPublishers
+                                        .ofString(requestBody))
+                        .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers
+                                .ofString());
+
+        if (response.statusCode() != 200) {
+
+            throw new RuntimeException(
+                    "LeetCode API error: "
+                            + response.statusCode()
+                            + " - "
+                            + response.body());
+        }
+
+        return objectMapper.readTree(
+                response.body());
     }
 }
