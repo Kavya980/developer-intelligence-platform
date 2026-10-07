@@ -71,8 +71,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/developer/**")
                         .hasRole("DEVELOPER")
 
-                        // GitHub APIs require developer login
                         .requestMatchers("/api/github/**")
+                        .hasRole("DEVELOPER")
+
+                        .requestMatchers("/api/leetcode/**")
                         .hasRole("DEVELOPER")
 
                         .anyRequest()

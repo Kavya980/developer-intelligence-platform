@@ -2,6 +2,7 @@ package com.kavya.developerintelligenceplatform.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kavya.developerintelligenceplatform.dto.LeetcodeContestDTO;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeProblemDTO;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeProfileDTO;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeStatsDTO;
@@ -196,6 +197,54 @@ public class LeetcodeService {
         }
 
         return problems;
+    }
+
+    public LeetcodeContestDTO getContestStats(
+            String username)
+            throws Exception {
+
+        String query = """
+            query userContestRankingInfo(
+                $username: String!
+            ) {
+                userContestRanking(
+                    username: $username
+                ) {
+                    attendedContestsCount
+                    rating
+                    globalRanking
+                    totalParticipants
+                }
+            }
+            """;
+
+        JsonNode contest =
+                executeQuery(
+                        query,
+                        Map.of("username", username),
+                        "userContestRankingInfo")
+                        .path("data")
+                        .path("userContestRanking");
+
+        // User has no contest history
+        if (contest.isMissingNode() || contest.isNull()) {
+
+            return new LeetcodeContestDTO(
+                    username,
+                    null,
+                    null,
+                    null,
+                    0
+            );
+        }
+
+        return new LeetcodeContestDTO(
+                username,
+                contest.path("rating").asDouble(),
+                contest.path("globalRanking").asInt(),
+                contest.path("totalParticipants").asInt(),
+                contest.path("attendedContestsCount").asInt()
+        );
     }
 
     private JsonNode executeQuery(
