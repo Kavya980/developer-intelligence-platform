@@ -74,7 +74,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/github/**")
                         .hasRole("DEVELOPER")
 
-                        .requestMatchers("/api/leetcode/**")
+                        .requestMatchers("/api/analytics/**")
                         .hasRole("DEVELOPER")
 
                         .anyRequest()
