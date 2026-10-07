@@ -7,7 +7,7 @@ import com.kavya.developerintelligenceplatform.dto.LeetcodeProblemDTO;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeProfileDTO;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeStatsDTO;
 import org.springframework.stereotype.Service;
-
+import com.kavya.developerintelligenceplatform.dto.LeetcodeLanguageDTO;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -245,6 +245,56 @@ public class LeetcodeService {
                 contest.path("totalParticipants").asInt(),
                 contest.path("attendedContestsCount").asInt()
         );
+    }
+
+    public List<LeetcodeLanguageDTO> getLanguages(
+            String username)
+            throws Exception {
+
+        String query = """
+            query languageStats($username: String!) {
+                matchedUser(username: $username) {
+                    languageProblemCount {
+                        languageName
+                        problemsSolved
+                    }
+                }
+            }
+            """;
+
+        JsonNode languages =
+                executeQuery(
+                        query,
+                        Map.of("username", username),
+                        "languageStats")
+                        .path("data")
+                        .path("matchedUser")
+                        .path("languageProblemCount");
+
+        if (!languages.isArray()) {
+            throw new RuntimeException(
+                    "Invalid LeetCode language response");
+        }
+
+        List<LeetcodeLanguageDTO> result =
+                new ArrayList<>();
+
+        for (JsonNode language : languages) {
+
+            result.add(
+                    new LeetcodeLanguageDTO(
+                            language
+                                    .path("languageName")
+                                    .asText(),
+
+                            language
+                                    .path("problemsSolved")
+                                    .asInt()
+                    )
+            );
+        }
+
+        return result;
     }
 
     private JsonNode executeQuery(
