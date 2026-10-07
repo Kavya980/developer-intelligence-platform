@@ -4,6 +4,7 @@ import com.kavya.developerintelligenceplatform.dto.LeetcodeContestDTO;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeLanguageDTO;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeProblemDTO;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeProfileDTO;
+import com.kavya.developerintelligenceplatform.dto.LeetcodeProfileSummaryDTO;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeStatsDTO;
 import com.kavya.developerintelligenceplatform.service.LeetcodeService;
 import org.springframework.web.bind.annotation.*;
@@ -57,5 +58,13 @@ public class LeetcodeController {
             throws Exception {
 
         return leetcodeService.getLanguages(username);
+    }
+
+    @GetMapping("/{username}/summary")
+    public LeetcodeProfileSummaryDTO getProfileSummary(
+            @PathVariable String username)
+            throws Exception {
+
+        return leetcodeService.getProfileSummary(username);
     }
 }

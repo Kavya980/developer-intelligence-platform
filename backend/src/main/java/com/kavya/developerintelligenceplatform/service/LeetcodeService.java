@@ -8,6 +8,7 @@ import com.kavya.developerintelligenceplatform.dto.LeetcodeProfileDTO;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeStatsDTO;
 import org.springframework.stereotype.Service;
 import com.kavya.developerintelligenceplatform.dto.LeetcodeLanguageDTO;
+import com.kavya.developerintelligenceplatform.dto.LeetcodeProfileSummaryDTO;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -197,6 +198,30 @@ public class LeetcodeService {
         }
 
         return problems;
+    }
+    public LeetcodeProfileSummaryDTO getProfileSummary(
+            String username)
+            throws Exception {
+
+        LeetcodeProfileDTO profile =
+                getProfile(username);
+
+        LeetcodeStatsDTO stats =
+                getStats(username);
+
+        LeetcodeContestDTO contest =
+                getContestStats(username);
+
+        List<LeetcodeLanguageDTO> languages =
+                getLanguages(username);
+
+        return new LeetcodeProfileSummaryDTO(
+                profile.getUsername(),
+                profile.getProfileUrl(),
+                stats,
+                contest,
+                languages
+        );
     }
 
     public LeetcodeContestDTO getContestStats(
